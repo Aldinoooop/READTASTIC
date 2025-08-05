@@ -31,6 +31,7 @@ dependencies:
   audioplayers: ^6.5.0
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
   qr_code_scanner_plus: ^2.0.10+1
 
   # The following adds the Cupertino Icons font to your application.
@@ -48,6 +49,9 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/app_Logo.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -84,7 +88,9 @@ flutter:
   - assets/1x/Ayamtitlemdpi.png
 
   - assets/1x/SoalBgmdpi.png
-
+  
+  - assets/Title_Soal.png
+  - assets/Listen.png
   - assets/1x/jambu_mdpi.png
   - assets/1x/mangga_mdpi.png
   - assets/1x/apel_mdpi.png
@@ -93,7 +99,9 @@ flutter:
 
   - assets/1x/asset36.png
   - assets/letters/
-
+  - assets/audioassets/
+  
+  - assets/app_Logo.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

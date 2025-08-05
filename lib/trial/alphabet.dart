@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
@@ -20,18 +21,31 @@ class AnimalSwitcher extends StatefulWidget {
 }
 
 class _AnimalSwitcherState extends State<AnimalSwitcher> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   final List<String> animals = ['Ayam', 'Babi', 'Cicak', 'Domba'];
   int currentIndex = 0;
+
+  Future<void> _playAnimalSound(String animal) async {
+    await _audioPlayer.stop(); // stop dulu jika sedang main
+    await _audioPlayer.play(AssetSource('audioassets/${animal.toLowerCase()}.mp3'));
+  }
+
+    void initState() {
+    super.initState();
+    _playAnimalSound(animals[currentIndex]);
+  }
 
   void _goToNext() {
     setState(() {
       currentIndex = (currentIndex + 1) % animals.length;
+      _playAnimalSound(animals[currentIndex]);
     });
   }
 
   void _goToPrevious() {
     setState(() {
       currentIndex = (currentIndex - 1 + animals.length) % animals.length;
+      _playAnimalSound(animals[currentIndex]);
     });
   }
 

@@ -59,6 +59,12 @@ class _FruitGameState extends State<FruitGame> {
     });
   }
 
+  Future<void> _playSound() async {
+    String answer = questions[currentIndex]["answer"];
+    await _player.stop(); // berhentiin dulu kalau ada suara lain
+    await _player.play(AssetSource('audioassets/${answer.toLowerCase()}.mp3'));
+  }
+
   Future<void> _checkAnswer() async {
     String correctAnswer = questions[currentIndex]["answer"];
     String userInput = userAnswer.map((l) => l?.char ?? '').join();
@@ -123,90 +129,118 @@ class _FruitGameState extends State<FruitGame> {
                 key: ValueKey<int>(currentIndex),
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Susun nama buah!",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Container(
+                    width: 400,
+                    child: Image.asset(
+                      'assets/Title_Soal.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  Image.asset(
-                    'assets/1x/${answer.toLowerCase()}_mdpi.png',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 8,
-                    children: List.generate(answer.length, (index) {
-                      return DragTarget<Letter>(
-                        onWillAccept: (data) => userAnswer[index] == null,
-                        onAccept: (data) {
-                          setState(() {
-                            userAnswer[index] = data;
-                            shuffledLetters.remove(data);
-                          });
-                          _checkAnswer();
-                        },
-                        builder: (context, candidateData, rejectedData) {
-                          return Container(
-                            width: 50,
-                            height: 60,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: userAnswer[index] != null
-                                    ? Colors.green
-                                    : Colors.red,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Image.asset(
+                            'assets/1x/${answer.toLowerCase()}_mdpi.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 10),
+                          GestureDetector(
+                            onTap: _playSound,
+                            child: Image.asset(
+                              'assets/Listen.png',
+                              width: 100,
                             ),
-                            child: userAnswer[index] != null
-                                ? Image.asset(
-                                    'assets/letters/${userAnswer[index]!.fileName}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 50),
+                      Column(
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            children: List.generate(answer.length, (index) {
+                              return DragTarget<Letter>(
+                                onWillAccept: (data) =>
+                                    userAnswer[index] == null,
+                                onAccept: (data) {
+                                  setState(() {
+                                    userAnswer[index] = data;
+                                    shuffledLetters.remove(data);
+                                  });
+                                  _checkAnswer();
+                                },
+                                builder:
+                                    (context, candidateData, rejectedData) {
+                                  return Container(
+                                    width: 50,
+                                    height: 60,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: userAnswer[index] != null
+                                            ? Colors.green
+                                            : Colors.red,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                    ),
+                                    child: userAnswer[index] != null
+                                        ? Image.asset(
+                                            'assets/letters/${userAnswer[index]!.fileName}',
+                                            width: 40,
+                                            height: 50,
+                                            fit: BoxFit.contain,
+                                          )
+                                        : const SizedBox(
+                                            width: 40, height: 50),
+                                  );
+                                },
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 40),
+                          Wrap(
+                            spacing: 10,
+                            children: shuffledLetters.map((letter) {
+                              return Draggable<Letter>(
+                                data: letter,
+                                feedback: Material(
+                                  color: Colors.transparent,
+                                  child: Image.asset(
+                                    'assets/letters/${letter.fileName}',
                                     width: 40,
                                     height: 50,
                                     fit: BoxFit.contain,
-                                  )
-                                : const SizedBox(width: 40, height: 50),
-                          );
-                        },
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 40),
-                  Wrap(
-                    spacing: 10,
-                    children: shuffledLetters.map((letter) {
-                      return Draggable<Letter>(
-                        data: letter,
-                        feedback: Material(
-                          color: Colors.transparent,
-                          child: Image.asset(
-                            'assets/letters/${letter.fileName}',
-                            width: 40,
-                            height: 50,
-                            fit: BoxFit.contain,
+                                  ),
+                                ),
+                                childWhenDragging: Opacity(
+                                  opacity: 0.3,
+                                  child: Image.asset(
+                                    'assets/letters/${letter.fileName}',
+                                    width: 40,
+                                    height: 50,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                                child: Image.asset(
+                                  'assets/letters/${letter.fileName}',
+                                  width: 40,
+                                  height: 50,
+                                  fit: BoxFit.contain,
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                        childWhenDragging: Opacity(
-                          opacity: 0.3,
-                          child: Image.asset(
-                            'assets/letters/${letter.fileName}',
-                            width: 40,
-                            height: 50,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        child: Image.asset(
-                          'assets/letters/${letter.fileName}',
-                          width: 40,
-                          height: 50,
-                          fit: BoxFit.contain,
-                        ),
-                      );
-                    }).toList(),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -217,8 +251,8 @@ class _FruitGameState extends State<FruitGame> {
               child: AnimatedOpacity(
                 opacity: 1.0,
                 duration: const Duration(milliseconds: 500),
-                child:
-                    Icon(Icons.check_circle, size: 120, color: Colors.green[600]),
+                child: Icon(Icons.check_circle,
+                    size: 120, color: Colors.green[600]),
               ),
             ),
         ],
