@@ -204,13 +204,13 @@ class _AnimalDisplayWidgetState extends State<AnimalDisplayWidget>
           ),
           const SizedBox(height: 16),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Gambar Judul
               Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue), // Outline biru
-                ),
+                // decoration: BoxDecoration(
+                //   border: Border.all(color: Colors.blue), // Outline biru
+                // ),
                 height: 80,
                 width: 100,
                 child: Image.asset(
@@ -219,13 +219,13 @@ class _AnimalDisplayWidgetState extends State<AnimalDisplayWidget>
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 5),
 
               // Gambar Teks
               Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue), // Outline biru
-                ),
+                // decoration: BoxDecoration(
+                //   border: Border.all(color: Colors.blue), // Outline biru
+                // ),
                 height: 100,
                 width: 100,
                 child: Image.asset(

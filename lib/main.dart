@@ -161,7 +161,7 @@ class _MyHomeState extends State<MyHome> with TickerProviderStateMixin {
                         child: Center(
                           child: Image.asset(
                             'assets/1x/Titlemdpi.png',
-                            height: screenHeight * 0.2,
+                            height: 0.2 * screenHeight,
                           ),
                         ),
                       )

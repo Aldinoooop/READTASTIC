@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:math';
-
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:math';
 
 final AudioPlayer _player = AudioPlayer();
 
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await SystemChrome.setPreferredOrientations([
-//     DeviceOrientation.landscapeRight,
-//     DeviceOrientation.landscapeLeft,
-//   ]);
-//   runApp(const MaterialApp(home: FruitGame()));
-// }
+class Letter {
+  final String char;
+  final int style;
+
+  Letter(this.char, this.style);
+
+  String get fileName => '${char.toUpperCase()}_$style.png';
+
+  @override
+  String toString() => char;
+}
 
 class FruitGame extends StatefulWidget {
   const FruitGame({super.key});
@@ -27,18 +28,14 @@ class _FruitGameState extends State<FruitGame> {
   bool isCorrect = false;
 
   final List<Map<String, dynamic>> questions = [
-    {"answer": "APEL"},
-    {"answer": "ANGGUR"},
-    {"answer": "MANGGA"},
-    {"answer": "JAMBU"},
-    // {"answer": "NANAS"},
-    // {"answer": "DURIAN"},
-    // {"answer": "APEL"},
-    // {"answer": "SEMANGKA"},
+    {"answer": "APEL", "style": 1},
+    {"answer": "ANGGUR", "style": 2},
+    {"answer": "MANGGA", "style": 3},
+    {"answer": "JAMBU", "style": 4},
   ];
 
-  List<String> shuffledLetters = [];
-  List<String?> userAnswer = [];
+  late List<Letter> shuffledLetters;
+  late List<Letter?> userAnswer;
 
   @override
   void initState() {
@@ -48,34 +45,59 @@ class _FruitGameState extends State<FruitGame> {
 
   void _loadQuestion() {
     String answer = questions[currentIndex]["answer"];
-    List<String> letters = answer.split('');
+    int style = questions[currentIndex]["style"];
+
+    List<Letter> letters =
+        answer.split('').map((c) => Letter(c, style)).toList();
+
     letters.shuffle(Random());
 
     setState(() {
-      shuffledLetters = letters;
-      userAnswer = List<String?>.filled(answer.length, null);
+      shuffledLetters = List<Letter>.from(letters);
+      userAnswer = List<Letter?>.filled(answer.length, null);
       isCorrect = false;
     });
   }
 
   Future<void> _checkAnswer() async {
     String correctAnswer = questions[currentIndex]["answer"];
-    String userInput = userAnswer.join();
+    String userInput = userAnswer.map((l) => l?.char ?? '').join();
 
-    if (userInput == correctAnswer) {
-      await _player.play(AssetSource('correctsound.mp3'));
-      setState(() {
-        isCorrect = true;
-      });
+    if (!userAnswer.contains(null)) {
+      if (userInput == correctAnswer) {
+        await _player.play(AssetSource('correctsound.mp3'));
+        setState(() {
+          isCorrect = true;
+        });
 
-      Future.delayed(const Duration(seconds: 2), () {
-        if (currentIndex < questions.length - 1) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (currentIndex < questions.length - 1) {
+            setState(() {
+              currentIndex++;
+            });
+            _loadQuestion();
+          } else {
+            setState(() {
+              isCorrect = false;
+              currentIndex = 0;
+            });
+            _loadQuestion();
+          }
+        });
+      } else {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          int style = questions[currentIndex]["style"];
           setState(() {
-            currentIndex++;
+            userAnswer = List<Letter?>.filled(correctAnswer.length, null);
+            shuffledLetters = correctAnswer
+                .split('')
+                .map((c) => Letter(c, style))
+                .toList()
+              ..shuffle(Random());
+            isCorrect = false;
           });
-          _loadQuestion();
-        }
-      });
+        });
+      }
     }
   }
 
@@ -86,109 +108,117 @@ class _FruitGameState extends State<FruitGame> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background PNG
           Positioned.fill(
             child: Image.asset(
-              'assets/1x/SoalBgmdpi.png', // Ganti dengan path sesuai asset kamu
+              'assets/1x/SoalBgmdpi.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Konten Utama
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Susun nama buah!",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-
-                // Gambar Buah (Slot khusus)
-                Image.asset(
-                  'assets/1x/${questions[currentIndex]["answer"]!.toLowerCase()}_mdpi.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.contain,
-                ),
-
-                const SizedBox(height: 20),
-
-                // Slot Jawaban
-                Wrap(
-                  spacing: 8,
-                  children: List.generate(answer.length, (index) {
-                    return DragTarget<String>(
-                      onAccept: (data) {
-                        setState(() {
-                          userAnswer[index] = data;
-                          shuffledLetters.remove(data);
-                        });
-                        _checkAnswer();
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          width: 50,
-                          height: 60,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: userAnswer[index] != null
-                                  ? Colors.green
-                                  : Colors.red,
-                              width: 2,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 600),
+              switchInCurve: Curves.easeIn,
+              switchOutCurve: Curves.easeOut,
+              child: Column(
+                key: ValueKey<int>(currentIndex),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Susun nama buah!",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/1x/${answer.toLowerCase()}_mdpi.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 8,
+                    children: List.generate(answer.length, (index) {
+                      return DragTarget<Letter>(
+                        onWillAccept: (data) => userAnswer[index] == null,
+                        onAccept: (data) {
+                          setState(() {
+                            userAnswer[index] = data;
+                            shuffledLetters.remove(data);
+                          });
+                          _checkAnswer();
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          return Container(
+                            width: 50,
+                            height: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: userAnswer[index] != null
+                                    ? Colors.green
+                                    : Colors.red,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
+                            child: userAnswer[index] != null
+                                ? Image.asset(
+                                    'assets/letters/${userAnswer[index]!.fileName}',
+                                    width: 40,
+                                    height: 50,
+                                    fit: BoxFit.contain,
+                                  )
+                                : const SizedBox(width: 40, height: 50),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 40),
+                  Wrap(
+                    spacing: 10,
+                    children: shuffledLetters.map((letter) {
+                      return Draggable<Letter>(
+                        data: letter,
+                        feedback: Material(
+                          color: Colors.transparent,
+                          child: Image.asset(
+                            'assets/letters/${letter.fileName}',
+                            width: 40,
+                            height: 50,
+                            fit: BoxFit.contain,
                           ),
-                          child: Text(
-                            userAnswer[index] ?? '',
-                            style: const TextStyle(fontSize: 24),
+                        ),
+                        childWhenDragging: Opacity(
+                          opacity: 0.3,
+                          child: Image.asset(
+                            'assets/letters/${letter.fileName}',
+                            width: 40,
+                            height: 50,
+                            fit: BoxFit.contain,
                           ),
-                        );
-                      },
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Huruf-huruf untuk drag
-                Wrap(
-                  spacing: 10,
-                  children: shuffledLetters.map((letter) {
-                    return Draggable<String>(
-                      data: letter,
-                      feedback: Material(
-                        color: Colors.transparent,
-                        child: Text(letter,
-                            style: const TextStyle(
-                                fontSize: 28, fontWeight: FontWeight.bold)),
-                      ),
-                      childWhenDragging: Opacity(
-                        opacity: 0.3,
-                        child: Text(letter,
-                            style: const TextStyle(
-                                fontSize: 28, fontWeight: FontWeight.bold)),
-                      ),
-                      child: Text(letter,
-                          style: const TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold)),
-                    );
-                  }).toList(),
-                )
-              ],
+                        ),
+                        child: Image.asset(
+                          'assets/letters/${letter.fileName}',
+                          width: 40,
+                          height: 50,
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
-
-          // Icon Benar
           if (isCorrect)
             Center(
               child: AnimatedOpacity(
                 opacity: 1.0,
                 duration: const Duration(milliseconds: 500),
-                child: Icon(Icons.check_circle,
-                    size: 120, color: Colors.green[600]),
+                child:
+                    Icon(Icons.check_circle, size: 120, color: Colors.green[600]),
               ),
             ),
         ],
