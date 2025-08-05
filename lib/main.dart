@@ -27,33 +27,58 @@ class MyHome extends StatefulWidget {
   State<MyHome> createState() => _MyHomeState();
 }
 
-class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
+class _MyHomeState extends State<MyHome> with TickerProviderStateMixin {
+  late final AnimationController _slideInController;
+  late final Animation<Offset> _slideInAnimation;
+
+  late final AnimationController _pulseController;
+  late final Animation<Offset> _pulseAnimation;
+
+  bool _showPulse = false;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+    // Animasi masuk dari atas (sekali)
+    _slideInController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 1000),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1), // Mulai dari atas layar
-      end: Offset.zero, // Berakhir di posisi normal
+    _slideInAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _slideInController,
       curve: Curves.easeOutBack,
     ));
 
-    _controller.forward(); // Jalankan animasi saat screen tampil
+    // Animasi berdenyut naik-turun
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _pulseAnimation = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(0, -0.5),
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Jalankan animasi slide-in, lalu lanjut ke pulse
+    _slideInController.forward().whenComplete(() {
+      setState(() => _showPulse = true);
+      _pulseController.repeat(reverse: true);
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _slideInController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -64,35 +89,93 @@ class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
+          // Background
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('Assets/1x/Background.png'),
+                image: AssetImage('assets/1x/Background.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Title image with fly-in animation
+          // Kiri asset36
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 2000),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.centerLeft,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 300,
+                height: 300,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+          // Kanan asset36
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 2000),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.centerRight,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 300,
+                height: 300,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+          // Title image: Slide in + Pulse
           Column(
             children: [
               SizedBox(height: screenHeight * 0.1),
               SlideTransition(
-                position: _slideAnimation,
-                child: Center(
-                  child: Image.asset(
-                    'Assets/1x/Titlemdpi.png',
-                    height: screenHeight * 0.2,
-                  ),
-                ),
+                position: _slideInAnimation,
+                child: _showPulse
+                    ? SlideTransition(
+                        position: _pulseAnimation,
+                        child: Center(
+                          child: Image.asset(
+                            'assets/1x/Titlemdpi.png',
+                            height: screenHeight * 0.2,
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Image.asset(
+                          'assets/1x/Titlemdpi.png',
+                          height: screenHeight * 0.2,
+                        ),
+                      ),
               ),
             ],
           ),
 
-          // Button in center
+          // Tombol di tengah layar
           Center(
             child: ElevatedButton(
               onPressed: () {
@@ -108,6 +191,8 @@ class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+
 
 class qrviewer extends StatefulWidget {
   const qrviewer({Key? key}) : super(key: key);
@@ -175,8 +260,55 @@ class _qrviewerState extends State<qrviewer>
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('Assets/1x/Background.png'),
+                image: AssetImage('assets/1x/Background.png'),
                 fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            // top: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 2000),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.centerLeft,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+          Positioned(
+            right: 0,
+            // top: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 2000),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.centerRight,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -187,7 +319,7 @@ class _qrviewerState extends State<qrviewer>
                 position: _slideAnimation,
                 child: Center(
                   child: Image.asset(
-                    'Assets/1x/Title2mdpi.png',
+                    'assets/1x/Title2mdpi.png',
                     height: screenHeight * 0.2,
                   ),
                 ),

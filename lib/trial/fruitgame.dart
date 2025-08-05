@@ -63,7 +63,7 @@ class _FruitGameState extends State<FruitGame> {
     String userInput = userAnswer.join();
 
     if (userInput == correctAnswer) {
-      // await _player.play(AssetSource('correctsound.mp3'));
+      await _player.play(AssetSource('correctsound.mp3'));
       setState(() {
         isCorrect = true;
       });
@@ -89,7 +89,7 @@ class _FruitGameState extends State<FruitGame> {
           // Background PNG
           Positioned.fill(
             child: Image.asset(
-              'Assets/1x/SoalBgmdpi.png', // Ganti dengan path sesuai asset kamu
+              'assets/1x/SoalBgmdpi.png', // Ganti dengan path sesuai asset kamu
               fit: BoxFit.cover,
             ),
           ),
@@ -106,7 +106,7 @@ class _FruitGameState extends State<FruitGame> {
 
                 // Gambar Buah (Slot khusus)
                 Image.asset(
-                  'Assets/1x/${questions[currentIndex]["answer"]!.toLowerCase()}_mdpi.png',
+                  'assets/1x/${questions[currentIndex]["answer"]!.toLowerCase()}_mdpi.png',
                   width: 100,
                   height: 100,
                   fit: BoxFit.contain,

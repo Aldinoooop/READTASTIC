@@ -43,15 +43,60 @@ class _AnimalSwitcherState extends State<AnimalSwitcher> {
           // Background image
           Positioned.fill(
             child: Image.asset(
-              'Assets/1x/MaterialBgmdpi.png',
+              'assets/1x/MaterialBgmdpi.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Semi-transparent overlay
-          // Positioned.fill(
-          //   child: Container(color: Colors.black.withOpacity(0.1)),
-          // ),
-          // Content
+
+          // KIRI: asset36 besar di bawah
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.bottomLeft,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+          // KANAN: asset36 besar di bawah
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  alignment: Alignment.bottomRight,
+                  child: child,
+                );
+              },
+              child: Image.asset(
+                'assets/1x/asset36.png',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+          // Konten tengah
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -61,15 +106,15 @@ class _AnimalSwitcherState extends State<AnimalSwitcher> {
                   children: [
                     IconButton(
                       icon: Image.asset(
-                        'Assets/1x/ArrowLeftmdpi.png', // Ganti dengan path PNG kamu
+                        'assets/1x/ArrowLeftmdpi.png',
                         width: 80,
                         height: 80,
-                        // color: Colors
-                        //     .white, // opsional: hanya berfungsi jika PNG hitam putih (monochrome)
                       ),
                       onPressed: _goToPrevious,
                     ),
-                    const SizedBox(width: 100),
+                    const SizedBox(width: 50),
+
+                    // Hewan tampil tengah
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       transitionBuilder:
@@ -83,42 +128,16 @@ class _AnimalSwitcherState extends State<AnimalSwitcher> {
                       },
                       child: AnimalDisplayWidget(
                         key: ValueKey<String>(animals[currentIndex]),
-                        animalName: animals[currentIndex], // misalnya: "cat"
+                        animalName: animals[currentIndex],
                       ),
                     ),
 
-                    // AnimatedSwitcher(
-                    //   duration: const Duration(milliseconds: 500),
-                    //   transitionBuilder:
-                    //       (Widget child, Animation<double> animation) {
-                    //     final offsetAnimation = Tween<Offset>(
-                    //       begin: const Offset(1, 0),
-                    //       end: Offset.zero,
-                    //     ).animate(animation);
-                    //     return SlideTransition(
-                    //         position: offsetAnimation, child: child);
-                    //   },
-                    //   child: Text(
-                    //     animals[currentIndex],
-                    //     key: ValueKey<String>(animals[currentIndex]),
-                    //     style: const TextStyle(
-                    //       fontSize: 48,
-                    //       color: Colors.white,
-                    //       fontWeight: FontWeight.bold,
-                    //       shadows: [
-                    //         Shadow(color: Colors.black, blurRadius: 10)
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    const SizedBox(width: 100),
+                    const SizedBox(width: 50),
                     IconButton(
                       icon: Image.asset(
-                        'Assets/1x/ArrowRightmdpi.png', // Ganti dengan path PNG kamu
+                        'assets/1x/ArrowRightmdpi.png',
                         width: 80,
                         height: 80,
-                        // color: Colors
-                        //     .white, // opsional: hanya berfungsi jika PNG hitam putih (monochrome)
                       ),
                       onPressed: _goToNext,
                     ),
@@ -133,7 +152,9 @@ class _AnimalSwitcherState extends State<AnimalSwitcher> {
   }
 }
 
-class AnimalDisplayWidget extends StatelessWidget {
+// import 'package:flutter/material.dart';
+
+class AnimalDisplayWidget extends StatefulWidget {
   final String animalName;
 
   const AnimalDisplayWidget({
@@ -142,40 +163,80 @@ class AnimalDisplayWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      key: key,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          'Assets/1x/${animalName}mdpi.png',
-          width: 200,
-          height: 200,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              'Assets/1x/${animalName}titlemdpi.png',
-              width: 150,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 10),
-            Image.asset(
-              'Assets/1x/${animalName}text.png',
-              width: 150,
-              fit: BoxFit.contain,
-            ),
-          ],
-        ),
+  State<AnimalDisplayWidget> createState() => _AnimalDisplayWidgetState();
+}
 
-        const SizedBox(height: 16),
-        // Image.asset(
-        //   'Assets/1x/${animalName}mdpi.png',
-        //   width: 250,
-        // ),
-      ],
+class _AnimalDisplayWidgetState extends State<AnimalDisplayWidget>
+    with SingleTickerProviderStateMixin {
+  double _scale = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger animasi saat build
+    Future.delayed(Duration.zero, () {
+      setState(() {
+        _scale = 1;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutBack,
+      tween: Tween<double>(begin: 0, end: _scale),
+      builder: (context, double scale, child) {
+        return Transform.scale(
+          scale: scale,
+          alignment: Alignment.center,
+          child: child,
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/1x/${widget.animalName}mdpi.png',
+            width: 100,
+            height: 100,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Gambar Judul
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue), // Outline biru
+                ),
+                height: 80,
+                width: 100,
+                child: Image.asset(
+                  'assets/1x/${widget.animalName}titlemdpi.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Gambar Teks
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue), // Outline biru
+                ),
+                height: 100,
+                width: 100,
+                child: Image.asset(
+                  'assets/1x/${widget.animalName}textmdpi.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
